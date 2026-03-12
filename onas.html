@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fyzika | O Nás</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ===== O NÁS – ČASOVÁ OSA ===== */
+    .onas-hero {
+      padding: 90px 0 60px;
+      text-align: center;
+    }
+
+    .onas-title {
+      font-size: clamp(48px, 6vw, 82px);
+      font-weight: 900;
+      color: var(--accent);
+      margin: 0 0 16px;
+      letter-spacing: .5px;
+    }
+
+    .onas-subtitle {
+      font-size: 18px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* ===== TIMELINE WRAPPER ===== */
+    .timeline {
+      position: relative;
+      padding: 60px 0 0;
+    }
+
+    /* Faded background track */
+    .timeline-track {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      transform: translateX(-50%);
+      background: rgba(11,42,74,.12);
+      border-radius: 4px;
+    }
+
+    /* Glowing scroll fill */
+    .timeline-fill {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 8px;
+      height: 0px;
+      transform: translateX(-50%);
+      border-radius: 4px;
+      background: linear-gradient(180deg, #6ab0f5 0%, #2872c8 40%, #0b2a4a 100%);
+      box-shadow:
+        0 0 10px rgba(74,144,217,.8),
+        0 0 28px rgba(74,144,217,.45),
+        0 0 55px rgba(11,42,74,.25);
+      z-index: 2;
+    }
+
+    /* Glowing dot tip at the bottom of fill */
+    .timeline-fill::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #6ab0f5;
+      box-shadow:
+        0 0 0 5px rgba(74,144,217,.20),
+        0 0 18px rgba(74,144,217,.9),
+        0 0 38px rgba(74,144,217,.55);
+    }
+
+    /* ===== INDIVIDUAL ITEMS ===== */
+    .timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      gap: 0;
+      margin-bottom: 160px;
+      align-items: center;
+    }
+
+    /* Odd: image left, text right */
+    .timeline-item:nth-child(odd)  .timeline-img-col  { order: 1; }
+    .timeline-item:nth-child(odd)  .timeline-dot-col  { order: 2; }
+    .timeline-item:nth-child(odd)  .timeline-text-col { order: 3; }
+
+    /* Even: image right, text left */
+    .timeline-item:nth-child(even) .timeline-img-col  { order: 3; }
+    .timeline-item:nth-child(even) .timeline-dot-col  { order: 2; }
+    .timeline-item:nth-child(even) .timeline-text-col { order: 1; }
+
+    /* DOT */
+    .timeline-dot-col {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 3;
+    }
+
+    .timeline-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 4px solid rgba(11,42,74,.28);
+      box-shadow: 0 0 0 4px rgba(11,42,74,.07);
+      transition: transform .4s cubic-bezier(.34,1.56,.64,1), background .3s ease, border-color .3s ease, box-shadow .3s ease;
+      flex-shrink: 0;
+    }
+
+    .timeline-item.visible .timeline-dot,
+    .timeline-item-last.visible .timeline-dot {
+      background: #4a90d9;
+      border-color: #4a90d9;
+      transform: scale(1.6);
+      box-shadow:
+        0 0 0 6px rgba(74,144,217,.18),
+        0 0 20px rgba(74,144,217,.65);
+    }
+
+    /* IMAGE COL */
+    .timeline-img-col {
+      padding: 0 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .timeline-img-wrap {
+      position: relative;
+      width: min(500px, 100%);
+      opacity: 0;
+      transition: opacity .75s ease, transform .75s cubic-bezier(.22,1,.36,1);
+    }
+
+    /* Slide from left for odd items */
+    .timeline-item:nth-child(odd) .timeline-img-wrap  { transform: translateX(-50px); }
+    /* Slide from right for even items */
+    .timeline-item:nth-child(even) .timeline-img-wrap { transform: translateX(50px); }
+
+    .timeline-item.visible .timeline-img-wrap {
+      opacity: 1;
+      transform: translateX(0) !important;
+    }
+
+    .timeline-img-wrap img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      border-radius: 20px;
+      border: 1px solid rgba(16,24,40,.12);
+      box-shadow: 0 24px 64px rgba(16,24,40,.18);
+      display: block;
+    }
+
+    .timeline-img-placeholder {
+      width: 100%;
+      aspect-ratio: 4/3;
+      border-radius: 20px;
+      border: 2px dashed rgba(11,42,74,.22);
+      background: rgba(236,233,226,.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .4px;
+    }
+
+    /* TEXT BUBBLE */
+    .timeline-text-col {
+      padding: 0 20px;
+      display: flex;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .6s ease .2s, transform .6s ease .2s;
+    }
+
+    .timeline-item:nth-child(odd)  .timeline-text-col { justify-content: flex-start; }
+    .timeline-item:nth-child(even) .timeline-text-col { justify-content: flex-end; }
+
+    .timeline-item.visible .timeline-text-col {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .timeline-bubble {
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(11,42,74,.13);
+      border-radius: 18px;
+      padding: 22px 28px;
+      box-shadow: 0 14px 36px rgba(16,24,40,.10);
+      text-align: center;
+      max-width: 280px;
+    }
+
+    .timeline-bubble-label {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .9px;
+      color: #4a90d9;
+      margin-bottom: 8px;
+    }
+
+    .timeline-bubble p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    /* ===== LAST ITEM – big centered finale ===== */
+    .timeline-item-last {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      padding-top: 20px;
+      margin-bottom: 0;
+    }
+
+    .timeline-item-last .timeline-dot {
+      width: 26px;
+      height: 26px;
+      border-width: 5px;
+    }
+
+    /* Big finale image */
+    .timeline-item-last .timeline-img-wrap {
+      width: min(760px, 100%);
+      opacity: 0;
+      transform: translateY(50px) scale(.97);
+      transition: opacity .9s ease .05s, transform .9s cubic-bezier(.22,1,.36,1) .05s;
+    }
+
+    .timeline-item-last.visible .timeline-img-wrap {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .timeline-item-last .timeline-img-wrap img,
+    .timeline-item-last .timeline-img-placeholder {
+      aspect-ratio: 3/2;
+      border-radius: 26px;
+      box-shadow: 0 50px 100px rgba(16,24,40,.24);
+    }
+
+    /* Soft glow behind final image */
+    .timeline-item-last .timeline-img-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -16px;
+      border-radius: 36px;
+      background: radial-gradient(ellipse at center, rgba(74,144,217,.22) 0%, transparent 70%);
+      z-index: -1;
+      filter: blur(20px);
+    }
+
+    /* Finale bubble */
+    .timeline-item-last .timeline-text-col {
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .6s ease .35s, transform .6s ease .35s;
+    }
+
+    .timeline-item-last.visible .timeline-text-col {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .timeline-item-last .timeline-bubble {
+      max-width: 440px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 760px) {
+      .timeline-item {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 64px;
+      }
+
+      .timeline-item .timeline-img-col,
+      .timeline-item .timeline-dot-col,
+      .timeline-item .timeline-text-col { order: unset !important; }
+
+      .timeline-item .timeline-text-col { justify-content: center !important; }
+
+      .timeline-track, .timeline-fill { display: none; }
+
+      .timeline-img-col { padding: 0; }
+      .timeline-text-col { padding: 0; }
+      .timeline-bubble { max-width: 100%; }
+    }
+  </style>
+</head>
+
+<body data-mode="">
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">MARTINI AND KIKINI</a>
+      <nav class="nav-links">
+        <a href="index.html">Úvod</a>
+        <a href="teorie.html">Teorie</a>
+        <a href="praxe.html">Praxe</a>
+        <a href="infografika.html">Infografika</a>
+        <a href="zajimavosti.html">Zajímavosti</a>
+        <a class="active" href="onas.html">O Nás</a>
+        <a href="zdroje.html">Zdroje</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="onas-hero">
+      <div class="container">
+        <h1 class="onas-title">Naše Cesta</h1>
+        <p class="onas-subtitle">Jak vznikl náš projekt – krok za krokem.</p>
+      </div>
+    </section>
+
+    <section class="timeline" id="timeline">
+      <div class="container" style="position:relative;" id="timelineInner">
+
+        <div class="timeline-track"></div>
+        <div class="timeline-fill" id="timelineFill"></div>
+
+        <!-- ITEM 1 – vlevo -->
+        <div class="timeline-item">
+          <div class="timeline-img-col">
+            <div class="timeline-img-wrap">
+              <img src="assets/img/Kiki_1.JPEG" alt="Krok 1">
+            </div>
+          </div>
+          <div class="timeline-dot-col"><div class="timeline-dot"></div></div>
+          <div class="timeline-text-col">
+            <div class="timeline-bubble">
+              <div class="timeline-bubble-label">Krok 1</div>
+              <p>Poprvé jsme se začali více bavit.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEM 2 – vpravo -->
+        <div class="timeline-item">
+          <div class="timeline-img-col">
+            <div class="timeline-img-wrap">
+              <img src="assets/img/Kiki_2.JPEG" alt="Krok 1">
+            </div>
+          </div>
+          <div class="timeline-dot-col"><div class="timeline-dot"></div></div>
+          <div class="timeline-text-col">
+            <div class="timeline-bubble">
+              <div class="timeline-bubble-label">Krok 2</div>
+              <p>Návštěva bytu Kiki abychom prokonzultovali projekt.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEM 3 – vlevo -->
+        <div class="timeline-item">
+          <div class="timeline-img-col">
+            <div class="timeline-img-wrap">
+              <img src="assets/img/Kiki_3.JPEG" alt="Krok 1">
+            </div>
+          </div>
+          <div class="timeline-dot-col"><div class="timeline-dot"></div></div>
+          <div class="timeline-text-col">
+            <div class="timeline-bubble">
+              <div class="timeline-bubble-label">Krok 3</div>
+              <p>Na nákupech abychom ze sebe dostali stres z projektu.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEM 4 – vpravo -->
+        <div class="timeline-item">
+          <div class="timeline-img-col">
+            <div class="timeline-img-wrap">
+              <img src="assets/img/Kiki_4.JPEG" alt="Krok 1">
+            </div>
+          </div>
+          <div class="timeline-dot-col"><div class="timeline-dot"></div></div>
+          <div class="timeline-text-col">
+            <div class="timeline-bubble">
+              <div class="timeline-bubble-label">Krok 4</div>
+              <p>Zajížďka do Anglie, abychom se sešli s Newtonem.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEM 5 – vlevo -->
+        <div class="timeline-item">
+          <div class="timeline-img-col">
+            <div class="timeline-img-wrap">
+              <img src="assets/img/Kiki_5.JPEG" alt="Krok 1">
+            </div>
+          </div>
+          <div class="timeline-dot-col"><div class="timeline-dot"></div></div>
+          <div class="timeline-text-col">
+            <div class="timeline-bubble">
+              <div class="timeline-bubble-label">Krok 5</div>
+              <p>Halloween je Halloween co k tomu dodat :).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEM 6 – VELKÁ FINÁLNÍ FOTKA, KONEC OSY -->
+        <div class="timeline-item-last" id="lastItem">
+          <div class="timeline-dot-col"><div class="timeline-dot"></div></div>
+          <div class="timeline-img-wrap">
+            <img src="assets/img/Kiki_6.JPEG" alt="Krok 1">
+          </div>
+          <div class="timeline-text-col">
+            <div class="timeline-bubble">
+              <div class="timeline-bubble-label">✦ Finále</div>
+              <p>Dokončení našeho dlouholetého projektu. Bylo to krásné a bylo toho dost.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div style="height: 100px;"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="brand">MARTINI AND KIKINI</div>
+        <p class="muted">Fyzika – O nás</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Úvod</a>
+        <a href="teorie.html">Teorie</a>
+        <a href="praxe.html">Praxe</a>
+        <a href="zajimavosti.html">Zajímavosti</a>
+        <a href="onas.html">O Nás</a>
+        <a href="zdroje.html">Zdroje</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const mode = localStorage.getItem("mode") || "zrcadla";
+    document.body.setAttribute("data-mode", mode);
+
+    /* ---- Reveal items on scroll ---- */
+    const allItems = document.querySelectorAll(".timeline-item, .timeline-item-last");
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
+    }, { threshold: 0.22 });
+    allItems.forEach(el => revealObs.observe(el));
+
+    /* ---- Smooth glowing fill that tracks exactly to the last dot ---- */
+    const fill     = document.getElementById("timelineFill");
+    const inner    = document.getElementById("timelineInner");
+    const lastItem = document.getElementById("lastItem");
+
+    let target  = 0;
+    let current = 0;
+
+    function computeTarget() {
+      if (!inner || !fill || !lastItem) return;
+
+      const dotEl    = lastItem.querySelector(".timeline-dot");
+      const innerTop = inner.getBoundingClientRect().top + window.scrollY;
+      const dotTop   = dotEl.getBoundingClientRect().top  + window.scrollY;
+      const dotMid   = dotTop + dotEl.offsetHeight / 2;
+      const total    = dotMid - innerTop;
+
+      const scrollMid = window.scrollY + window.innerHeight * 0.58;
+      const raw       = (scrollMid - innerTop) / total;
+      target = Math.max(0, Math.min(total, raw * total));
+    }
+
+    function tick() {
+      computeTarget();
+      current += (target - current) * 0.10;
+      fill.style.height = current + "px";
+      requestAnimationFrame(tick);
+    }
+
+    tick();
+  </script>
+  <!-- LIGHTBOX -->
+<div id="lightbox" style="
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(10,20,35,.92); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center; cursor:zoom-out;
+">
+  <img id="lightbox-img" src="" alt="" style="
+    max-width:90vw; max-height:90vh;
+    border-radius:18px;
+    box-shadow:0 40px 100px rgba(0,0,0,.5);
+    object-fit:contain;
+  ">
+</div>
+
+<script>
+  const lb    = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lightbox-img");
+
+  // Otevři lightbox po kliknutí na libovolný obrázek v timeline
+  document.querySelectorAll(".timeline-img-wrap img").forEach(img => {
+    img.style.cursor = "zoom-in";
+    img.addEventListener("click", () => {
+      lbImg.src = img.src;
+      lb.style.display = "flex";
+      document.body.style.overflow = "hidden";
+    });
+  });
+
+  // Zavři kliknutím kamkoliv nebo klávesou Escape
+  lb.addEventListener("click", close);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+
+  function close() {
+    lb.style.display = "none";
+    document.body.style.overflow = "";
+  }
+</script>
+<div id="lb" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,20,35,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;cursor:zoom-out;" onclick="this.style.display='none';document.body.style.overflow=''">
+  <img id="lb-img" src="" style="max-width:90vw;max-height:90vh;border-radius:18px;box-shadow:0 40px 100px rgba(0,0,0,.5);">
+</div>
+
+<script>
+  document.querySelectorAll(".timeline-img-wrap img").forEach(img => {
+    img.style.cursor = "zoom-in";
+    img.addEventListener("dblclick", () => {
+      document.getElementById("lb-img").src = img.src;
+      const lb = document.getElementById("lb");
+      lb.style.display = "flex";
+      document.body.style.overflow = "hidden";
+    });
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      document.getElementById("lb").style.display = "none";
+      document.body.style.overflow = "";
+    }
+  });
+</script>
+</body>
+</html>
